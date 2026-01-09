@@ -8,8 +8,8 @@ export default defineConfig({
   splitting: true,
   treeshake: true,
   sourcemap: true,
-  clean: true,
-  dts:true,
-  minify:false,
+  clean: false,  // Don't clean - tsc generates .d.ts files first
+  dts: false,    // Let tsc handle declaration files for NodeNext compatibility
+  minify: false,
   format: ['cjs', 'esm'],
 })

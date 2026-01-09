@@ -1,5 +1,5 @@
 import {fileTypeFromFile} from 'file-type';
-import {SimpleFileType} from "../SimpleFileType";
+import {SimpleFileType} from "../SimpleFileType.js";
 
 export class FileTypeConfigurable {
 

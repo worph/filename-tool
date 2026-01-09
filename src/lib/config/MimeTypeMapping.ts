@@ -1,4 +1,4 @@
-import {SimpleFileType} from "../SimpleFileType";
+import {SimpleFileType} from "../SimpleFileType.js";
 
 export const mimeTypeMappings: { [key: string]: SimpleFileType } = {
     'text/plain': 'undefined',//text could be anything document or subtitle or other

@@ -1,20 +1,19 @@
-export * from './FileNameMetaExtractor';
-export * from './FileNameVideoMetaExtractor';
-export * from './SimpleFileType';
-export * from './FileType';
+export * from './FileNameMetaExtractor.js';
+export * from './FileNameVideoMetaExtractor.js';
+export * from './SimpleFileType.js';
+export * from './FileType.js';
 
-export * from './tools/folder/FolderTool';
-export * from "./tools/lang/LanguageTool";
-export * from './tools/video/SerieFilesNamaAnalysisTool';
-export * from './tools/FileNameCleaner';
-export * from './tools/FileNameStringOperation';
-export * from './tools/FileTypeConfigurable';
-export * from './tools/StringArrayOperation';
-export * from './tools/TwoStringsOperation';
+export * from './tools/folder/FolderTool.js';
+export * from './tools/lang/LanguageTool.js';
+export * from './tools/video/SerieFilesNamaAnalysisTool.js';
+export * from './tools/FileNameCleaner.js';
+export * from './tools/FileNameStringOperation.js';
+export * from './tools/FileTypeConfigurable.js';
+export * from './tools/StringArrayOperation.js';
+export * from './tools/TwoStringsOperation.js';
 
-export * from './config/AnimeKeywords';
-export * from './config/ExtentionsMapping';
-export * from './config/KeywordsArray';
-export * from './config/MimeTypeMapping';
-export * from './config/SeasonAndEpisodePatterns';
-
+export * from './config/AnimeKeywords.js';
+export * from './config/ExtentionsMapping.js';
+export * from './config/KeywordsArray.js';
+export * from './config/MimeTypeMapping.js';
+export * from './config/SeasonAndEpisodePatterns.js';

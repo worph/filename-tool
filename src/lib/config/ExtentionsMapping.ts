@@ -1,4 +1,4 @@
-import {SimpleFileType} from "../SimpleFileType";
+import {SimpleFileType} from "../SimpleFileType.js";
 
 export const extensionMappings: { [key: string]: SimpleFileType } = {
     // Audio

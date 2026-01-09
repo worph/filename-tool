@@ -5,10 +5,10 @@ import path from 'path';
 import {episodePatterns, seasonAndEpisodePatterns, seasonPatterns, soloEp} from "./config/SeasonAndEpisodePatterns.js";
 import {extraEpKeyWords, keywordsArray, substringArray} from "./config/KeywordsArray.js";
 import {existsSync, readFileSync} from "fs";
-import {extensionMappings} from "./config/ExtentionsMapping";
-import {mimeTypeMappings} from "./config/MimeTypeMapping";
-import {FileNameVideoMetaExtractor, VideoFileMetadata} from "./FileNameVideoMetaExtractor";
-import {FileTypeConfigurable} from "./tools/FileTypeConfigurable";
+import {extensionMappings} from "./config/ExtentionsMapping.js";
+import {mimeTypeMappings} from "./config/MimeTypeMapping.js";
+import {FileNameVideoMetaExtractor, VideoFileMetadata} from "./FileNameVideoMetaExtractor.js";
+import {FileTypeConfigurable} from "./tools/FileTypeConfigurable.js";
 
 /**
  * Result of file metadata extraction

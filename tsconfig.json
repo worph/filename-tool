@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
     "noImplicitAny": false,
-    "module": "esnext",
-    "target": "esnext",
+    "module": "NodeNext",
+    "target": "ESNext",
     "allowJs": true,
     "sourceMap": true,
-    "esModuleInterop":true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "moduleResolution": "node",
-    "baseUrl": "./",
+    "declaration": true,
+    "declarationDir": "./dist",
+    "emitDeclarationOnly": true,
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": "./src/lib",
+    "baseUrl": "./"
   },
   "include": [
     "src/lib"

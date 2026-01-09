@@ -23,7 +23,8 @@
     }
   },
   "scripts": {
-    "build": "cross-env tsc && tsup",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc && tsup",
     "test": "vitest"
   },
   "devDependencies": {
