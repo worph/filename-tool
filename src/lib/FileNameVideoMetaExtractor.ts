@@ -126,21 +126,63 @@ export class FileNameVideoMetaExtractor {
         return this.cleanTitle(this.getParentFolder(filePath, 2));
     }
 
+    /**
+     * Check if a filename contains a season/episode pattern (indicates TV show)
+     */
+    private filenameHasSeasonEpisodePattern(filename: string): boolean {
+        const cleanedFilename = this.serieFilesNameAnalysisTool.removeKeywordsFromFilename(filename);
+        const cleanedFilename2 = this.serieFilesNameAnalysisTool.removeSFV(cleanedFilename);
+        const cleanedFilename3 = this.fileNameCleaner.cleanSpecialChars(cleanedFilename2);
+        const cleanedFilename4 = this.fileNameCleaner.cleanSpace(cleanedFilename3);
+        const [season, episode] = this.serieFilesNameAnalysisTool.findSeasonAndEpisode(cleanedFilename4);
+        return season >= 0 || episode >= 0;
+    }
+
     computeTitleFromFilePath(filePath: string): string | undefined {
         let filename = this.fileNameCleaner.getFilenameFromPath(filePath);
         let titleFromFileName = this.computeTitleFromFileName(filename);
         let titleFromParentFolder = this.computeTitleFromParentFolder(filePath);
         let titleFromGrandParentFolder = this.computeTitleFromGrandParentFolder(filePath);
         let simpleTitle = this.stringArrayOperation.longestString([titleFromFileName, titleFromParentFolder, titleFromGrandParentFolder]);
+
+        // Check if filename contains season/episode pattern (indicates TV show)
+        const isTvShow = this.filenameHasSeasonEpisodePattern(filename);
+
         let selectedTitle;
-        if (titleFromFileName && titleFromFileName.length > MIN_TITLE_LENGTH) {
-            selectedTitle = titleFromFileName;
-        } else if (titleFromParentFolder && titleFromParentFolder.length > MIN_TITLE_LENGTH) {
-            selectedTitle = titleFromParentFolder;
-        } else if (titleFromGrandParentFolder && titleFromGrandParentFolder.length > MIN_TITLE_LENGTH) {
-            selectedTitle = titleFromGrandParentFolder;
+
+        if (isTvShow) {
+            // For TV shows, prefer the longer title between filename and folder
+            // This handles cases like "S01E01-The Fool.mkv" where "The Fool" is the episode name
+            // but "Lord of Mysteries" in the parent folder is the actual series title
+            const filenameTitleValid = titleFromFileName && titleFromFileName.length > MIN_TITLE_LENGTH;
+            const folderTitleValid = titleFromParentFolder && titleFromParentFolder.length > MIN_TITLE_LENGTH;
+
+            if (filenameTitleValid && folderTitleValid) {
+                // Both valid - prefer the longer one (series names are typically longer than episode names)
+                // Use strict > to avoid preferring folder when lengths are equal (e.g., "Dexter" vs "Series")
+                selectedTitle = titleFromParentFolder.length > titleFromFileName.length
+                    ? titleFromParentFolder
+                    : titleFromFileName;
+            } else if (folderTitleValid) {
+                selectedTitle = titleFromParentFolder;
+            } else if (filenameTitleValid) {
+                selectedTitle = titleFromFileName;
+            } else if (titleFromGrandParentFolder && titleFromGrandParentFolder.length > MIN_TITLE_LENGTH) {
+                selectedTitle = titleFromGrandParentFolder;
+            } else {
+                selectedTitle = simpleTitle;
+            }
         } else {
-            selectedTitle = simpleTitle;
+            // For non-TV shows (movies, etc.), use original logic: prefer filename
+            if (titleFromFileName && titleFromFileName.length > MIN_TITLE_LENGTH) {
+                selectedTitle = titleFromFileName;
+            } else if (titleFromParentFolder && titleFromParentFolder.length > MIN_TITLE_LENGTH) {
+                selectedTitle = titleFromParentFolder;
+            } else if (titleFromGrandParentFolder && titleFromGrandParentFolder.length > MIN_TITLE_LENGTH) {
+                selectedTitle = titleFromGrandParentFolder;
+            } else {
+                selectedTitle = simpleTitle;
+            }
         }
 
         if (selectedTitle && selectedTitle.length > MIN_TITLE_LENGTH) {

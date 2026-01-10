@@ -164,6 +164,14 @@ describe('FileNameMetaExtractor', () => {
     describe('Edge cases - title from folder (skipped)', () => {
         // These tests are skipped because the parser doesn't extract title from folder name
         // when the filename doesn't contain the show title
+        // Pattern: FolderWithTitle/S01E01-EpisodeName.mkv should extract title from folder
+
+        it('Lord of Mysteries - title from folder, filename is S01E01-EpisodeName pattern', async () => {
+            // Real-world case: folder contains title + quality info, filename is S01E01-EpisodeName format
+            // Expected: extract "Lord of Mysteries" from folder, not "The Fool" from filename
+            await titleSeasonEpTester('Lord of Mysteries', '1', '1',
+                '/data/watch/test-files/Anime/Lord of Mysteries S01 1080p Dual Audio WEBRip DD+ x265-EMBER/S01E01-The Fool [8A4E8B1F].mkv');
+        });
 
         it.skip('handles files named with season in folder', async () => {
             await titleSeasonEpTester('MythBusters', '2', '1',
@@ -180,7 +188,7 @@ describe('FileNameMetaExtractor', () => {
                 '/data/watch/test-files/Anime/Le Depart/13 it a new start.mkv');
         });
 
-        it.skip('Akudama Drive - title from folder', async () => {
+        it('Akudama Drive - title from folder', async () => {
             await titleSeasonEpTester('Akudama Drive', '1', '2',
                 '/data/watch/test-files/Anime/Akudama Drive/S01E02-RESERVOIR DOGS [F1D64557].mkv');
         });
@@ -210,8 +218,8 @@ describe('FileNameMetaExtractor', () => {
                 '/data/watch/test-files/Anime/K-Project/[CBM]_K_-_02_-_Kitten_[1080p-FLAC]_[A83DF131].mkv');
         });
 
-        it.skip('Made in Abyss - title from folder', async () => {
-            await titleSeasonEpTester('Made In Abyss', '1', '2',
+        it('Made in Abyss - title from folder', async () => {
+            await titleSeasonEpTester('Made in Abyss', '1', '2',
                 '/data/watch/test-files/Anime/Made in Abyss/S01E02-Resurrection Festival [AE07AD68].mkv');
         });
 
