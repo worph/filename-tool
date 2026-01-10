@@ -60,7 +60,7 @@ export class FileNameVideoMetaExtractor {
         const normalizedFilePath = path.normalize(filePath);
 
         const folderList = this.watchFolderList;
-        if (folderList) {
+        if (folderList && folderList.length > 0) {
             for (let folder of folderList) {
                 const mediaRootFolder = path.normalize(folder);
                 if (normalizedFilePath.startsWith(mediaRootFolder)) {
