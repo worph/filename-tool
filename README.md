@@ -27,7 +27,7 @@ When using as a dependency:
 ```json
 {
   "dependencies": {
-    "@metazla/filename-tool": "workspace:*"
+    "@metazla/filename-tools": "workspace:*"
   }
 }
 ```
@@ -35,7 +35,7 @@ When using as a dependency:
 ## Usage
 
 ```typescript
-import { FilenameParser } from '@metazla/filename-tool';
+import { FilenameParser } from '@metazla/filename-tools';
 
 // Parse a filename
 const result = FilenameParser.parse('[SubsPlease] Naruto - 01 (1080p) [12345678].mkv');

@@ -84,27 +84,4 @@ export class FileNameMetaExtractor {
 
         return result;
     }
-
-    /**
-     * @deprecated Use extractMetadata instead - returns plain object
-     */
-    async processFile(filePath: string, metadata: any): Promise<void> {
-        const result = await this.extractMetadata(filePath);
-
-        // Write to metadata object for backwards compatibility
-        if (result.fileName) metadata.at("fileName").set(result.fileName);
-        if (result.extension) metadata.at("extension").set(result.extension);
-        if (result.tags) {
-            for (const tag of result.tags) {
-                metadata.at("tags").add(tag);
-            }
-        }
-        if (result.originalTitle) metadata.at("originalTitle").set(result.originalTitle);
-        if (result.movieYear) metadata.at("movieYear").set(result.movieYear);
-        if (result.season) metadata.at("season").set(result.season);
-        if (result.episode) metadata.at("episode").set(result.episode);
-        if (result.increment) metadata.at("increment").set(result.increment);
-        if (result.extra) metadata.at("extra").set(result.extra);
-        if (result.videoType) metadata.at("videoType").set(result.videoType);
-    }
 }
