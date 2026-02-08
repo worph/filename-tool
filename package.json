@@ -24,7 +24,8 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && tsc && tsup",
+    "build": "pnpm run clean && tsc && tsup",
+    "prepare": "pnpm run build",
     "test": "vitest"
   },
   "devDependencies": {
