@@ -1,29 +1,26 @@
 # Filename Tool
 
-TypeScript library for extracting metadata from media filenames, designed for the Meta Orbit ecosystem.
+TypeScript library for extracting metadata from media filenames, designed for the MetaMesh ecosystem.
+
+Package name: `@metazla/filename-tools` (plural — kept for backwards compatibility).
 
 ## Overview
 
-Filename Tool parses media filenames to extract structured metadata such as titles, seasons, episodes, quality, languages, and other relevant information. It's designed to work with various naming conventions used in media files.
+`@metazla/filename-tools` parses media file paths to extract structured metadata: titles, seasons, episodes, movie years, plus file-type classification driven by extension and MIME-type mappings. It is a pure-TS library — no Docker, no service. Used inside meta-sort (`WatchedFileProcessor`) and inside the `metamesh-plugin-filename-parser` container plugin.
 
 ## Features
 
-- **Title Extraction**: Identifies show/movie titles from filenames
-- **Episode & Season Detection**: Parses episode and season numbers in various formats
-- **Quality Detection**: Identifies resolution (1080p, 720p, 4K) and quality indicators
-- **Language Detection**: Extracts language codes and audio track information
-- **Release Group**: Identifies fansub/release group tags
-- **Format Support**: Handles multiple filename patterns and conventions
-- **Platform Agnostic**: Dual builds for Node.js and browser environments
+- **Video metadata extraction** — title, season, episode, increment, movie year, `videoType: "movie" | "tvshow"`
+- **File-type classification** — by extension and MIME type, into a small set (`video`, `audio`, `subtitle`, `document`, `archive`, `torrent`, `other`, `undefined`)
+- **Title heuristics** — combines filename, parent folder, grandparent folder; TV-show pattern detection picks the series name over the episode name
+- **Folder helpers** — sibling-file lookup
+- **Language helpers** — convert anything (ISO 639-1 / 2 / 3 / full name) to ISO 639-3
+- **Configurable** — every pattern set (`episodePatterns`, `seasonAndEpisodePatterns`, `keywordsArray`, …) is exported and overridable
 
 ## Installation
 
-From the monorepo root:
-```bash
-pnpm install
-```
+In the monorepo:
 
-When using as a dependency:
 ```json
 {
   "dependencies": {
@@ -32,116 +29,130 @@ When using as a dependency:
 }
 ```
 
-## Usage
-
-```typescript
-import { FilenameParser } from '@metazla/filename-tools';
-
-// Parse a filename
-const result = FilenameParser.parse('[SubsPlease] Naruto - 01 (1080p) [12345678].mkv');
-
-console.log(result);
-// {
-//   title: 'Naruto',
-//   episode: 1,
-//   season: 1,
-//   quality: '1080p',
-//   releaseGroup: 'SubsPlease',
-//   hash: '12345678',
-//   extension: 'mkv'
-// }
-```
-
-## Supported Filename Patterns
-
-### TV Shows
-- `ShowName S01E01.mkv`
-- `ShowName - 01.mkv`
-- `[Group] ShowName - 01 (1080p).mkv`
-- `ShowName.S01E01.1080p.WEB-DL.mkv`
-
-### Movies
-- `MovieName (2024) 1080p BluRay.mkv`
-- `MovieName.2024.1080p.BluRay.x264.mkv`
-- `[Group] MovieName (2024).mkv`
-
-### Quality Detection
-- Resolution: `1080p`, `720p`, `2160p`, `4K`, `8K`
-- Source: `BluRay`, `WEB-DL`, `HDTV`, `DVDRip`
-- Codec: `x264`, `x265`, `HEVC`, `AV1`
-
-### Language Detection
-- Audio languages: `eng`, `jpl`, `spa`, `fre`, etc.
-- Subtitle languages: `[eng sub]`, `[multiple subs]`
-- Dual audio: `[eng+jpl]`
-
-## Architecture
-
-### Build Configuration
-Built with `tsup` for dual output:
-- **Node.js**: `dist/index.js` (ESM) and `dist/index.cjs` (CommonJS)
-- **Browser**: `dist/index-browser.js` (ESM) and `dist/index-browser.cjs` (CommonJS)
-
-### Pattern Matching
-Uses regex patterns and heuristics to handle various filename formats:
-- Episode number detection with multiple patterns
-- Title cleanup (remove tags, group names)
-- Quality and resolution parsing
-- Hash/CRC extraction
-
-## Development
-
-### Building
+Build from `packages/filename-tool/`:
 
 ```bash
-# From monorepo root
-pnpm run build
-
-# From package directory
-cd packages/filename-tool
-pnpm run build
+pnpm build
+pnpm test    # vitest
 ```
 
-### Testing
+## Public API
+
+The full export list is in `src/lib/index.ts`. The two extractor classes are the main entry points; the rest are tools/configs that the extractors consume but you can use directly.
+
+### `FileNameMetaExtractor`
+
+`extractMetadata(filePath)` is the high-level entry point. It returns a `FileMetadata` (extends `VideoFileMetadata`):
+
+```typescript
+import { FileNameMetaExtractor, FileMetadata } from '@metazla/filename-tools';
+
+const watchFolders = ['/files/watch'];
+const extractor = new FileNameMetaExtractor(watchFolders);
+
+const metadata: FileMetadata = await extractor.extractMetadata(
+  '/files/watch/Naruto/Season 01/Naruto.S01E01.1080p.mkv',
+);
+
+// metadata fields that may be populated:
+//   fileName     : "Naruto.S01E01.1080p.mkv"
+//   extension    : "mkv"
+//   fileType     : "video"
+//   tags         : string[]                  (extracted from brackets)
+//   originalTitle: "Naruto"
+//   season       : "1"
+//   episode      : "1"
+//   increment    : "10001"                   (season * 10000 + episode)
+//   movieYear?   : string
+//   videoType    : "tvshow"                  (or "movie")
+//   extra?       : "true"                    (specials/extras)
+```
+
+The optional second constructor arg is a path to a JSON file that overrides any of the default pattern sets (`extensionMappings`, `mimeTypeMappings`, `episodePatterns`, `seasonAndEpisodePatterns`, `seasonPatterns`, `extraEpKeyWords`, `keywordsArray`, `substringArray`, `soloEp`).
+
+### `FileNameVideoMetaExtractor`
+
+Lower-level — only does the video bits (title, season/episode, year, videoType). Requires all pattern arrays as constructor args (see how `metamesh-plugin-filename-parser` constructs it):
+
+```typescript
+import {
+  FileNameVideoMetaExtractor,
+  episodePatterns,
+  seasonAndEpisodePatterns,
+  seasonPatterns,
+  extraEpKeyWords,
+  keywordsArray,
+  substringArray,
+  soloEp,
+  VideoFileMetadata,
+} from '@metazla/filename-tools';
+
+const extractor = new FileNameVideoMetaExtractor(
+  [],
+  episodePatterns,
+  seasonAndEpisodePatterns,
+  seasonPatterns,
+  extraEpKeyWords,
+  keywordsArray,
+  substringArray,
+  soloEp,
+);
+
+const meta: VideoFileMetadata = extractor.extractVideoFileMetadata(
+  'The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv',
+);
+// { originalTitle: "The Matrix", movieYear: "1999", videoType: "movie" }
+```
+
+### `FileType`
+
+Synchronous classifier wrapping `FileTypeConfigurable` with the default mappings:
+
+```typescript
+import { FileType, SimpleFileType } from '@metazla/filename-tools';
+
+const ft = new FileType();
+const t: SimpleFileType = await ft.getFileType('episode.mkv');  // "video"
+```
+
+`SimpleFileType` is the union of all classifications: `'audio' | 'video' | 'document' | 'archive' | 'subtitle' | 'torrent' | 'other' | 'undefined'`.
+
+### Folder helper
+
+```typescript
+import { getSiblingFiles } from '@metazla/filename-tools';
+
+// Returns siblings sharing the same basename (any extension).
+const siblings = await getSiblingFiles('/media/show/episode.nfo');
+```
+
+### Language helper
+
+```typescript
+import { anyTo_iso_639_3 } from '@metazla/filename-tools';
+
+anyTo_iso_639_3('en');         // "eng" (ISO 639-1 → 639-3)
+anyTo_iso_639_3('english');    // "eng" (name → 639-3)
+anyTo_iso_639_3('jpn');        // "jpn" (already 639-3; pass-through)
+```
+
+## What `videoType` actually contains
+
+Note this differs from what some older docs claim — the library only emits `"tvshow"` or `"movie"`. There is no `"anime"`/`"documentary"`/`"unknown"` value. Anime-detection happens elsewhere (the `metamesh-plugin-anime-detector` plugin and `AnimeMeta` in `@metazla/meta-interface`).
+
+## Build
+
+Dual-format build via `tsup`:
+
+- `dist/index.js` (ESM)
+- `dist/index.cjs` (CommonJS)
+- `dist/index.d.ts` (types)
 
 ```bash
-cd packages/filename-tool
-pnpm test
+pnpm build      # tsc + tsup
+pnpm test       # vitest
 ```
-
-Uses Vitest for unit tests with comprehensive filename pattern coverage.
-
-## Integration
-
-Used by:
-- **meta-mesh**: Primary metadata extraction from filenames
-- **meta-orbit**: Filename normalization for distributed queries
-- **meta-ui**: Display and search filename metadata
-
-## Examples
-
-### Anime Filenames
-```typescript
-const result = FilenameParser.parse('[HorribleSubs] Attack on Titan - 25 [1080p].mkv');
-// { title: 'Attack on Titan', episode: 25, quality: '1080p', releaseGroup: 'HorribleSubs' }
-```
-
-### Movie Filenames
-```typescript
-const result = FilenameParser.parse('The.Matrix.1999.1080p.BluRay.x264-GROUP.mkv');
-// { title: 'The Matrix', year: 1999, quality: '1080p', source: 'BluRay', codec: 'x264' }
-```
-
-### Multi-Episode
-```typescript
-const result = FilenameParser.parse('Show.Name.S01E01-E03.1080p.mkv');
-// { title: 'Show Name', season: 1, episodes: [1, 2, 3], quality: '1080p' }
-```
-
-## Contributing
-
-This package is part of the Meta Orbit monorepo. See the root README for contribution guidelines.
 
 ## License
 
-MIT - Same as Meta Orbit monorepo
+MIT — same as the MetaMesh monorepo.
