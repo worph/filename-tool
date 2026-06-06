@@ -1,6 +1,7 @@
 import {FileNameCleaner} from "./tools/FileNameCleaner.js";
 import {StringArrayOperation} from "./tools/StringArrayOperation.js";
 import {SerieFilesNameAnalysisTool} from "./tools/video/SerieFilesNamaAnalysisTool.js";
+import {extractQuality, extractCodec, extractLanguages} from "./tools/video/ReleaseTagExtractor.js";
 import path from 'path';
 
 /**
@@ -14,6 +15,12 @@ export interface VideoFileMetadata {
     movieYear?: string;
     videoType?: 'tvshow' | 'movie';
     extra?: string;
+    /** Title-derived resolution tier (`"1080p"`, …). See ReleaseTagExtractor. */
+    quality?: string;
+    /** Title-derived normalized video codec (`"hevc"`/`"h264"`/…). */
+    codec?: string;
+    /** Title-derived audio/subtitle languages, ISO 639-2/B (`["fre","mul"]`). */
+    languages?: string[];
 }
 
 const MIN_TITLE_LENGTH = 3;
@@ -309,6 +316,17 @@ export class FileNameVideoMetaExtractor {
         if (this.serieFilesNameAnalysisTool.isExtra(filePath)) {
             result.extra = "true";
         }
+
+        // Title-derived release tags (quality / codec / languages). Matched over
+        // the whole path so a tag in the parent folder ("Show.1080p/ep01.mkv")
+        // or the filename both count. Best-effort — a real-stream probe should
+        // take precedence when one is available (see ReleaseTagExtractor).
+        const quality = extractQuality(filePath);
+        if (quality) result.quality = quality;
+        const codec = extractCodec(filePath);
+        if (codec) result.codec = codec;
+        const languages = extractLanguages(filePath);
+        if (languages.length > 0) result.languages = languages;
 
         // Compute video type
         const season = result.season ? parseInt(result.season) : -1;

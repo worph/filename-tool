@@ -6,6 +6,7 @@ export * from './FileType.js';
 export * from './tools/folder/FolderTool.js';
 export * from './tools/lang/LanguageTool.js';
 export * from './tools/video/SerieFilesNamaAnalysisTool.js';
+export * from './tools/video/ReleaseTagExtractor.js';
 export * from './tools/FileNameCleaner.js';
 export * from './tools/FileNameStringOperation.js';
 export * from './tools/FileTypeConfigurable.js';
