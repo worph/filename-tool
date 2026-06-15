@@ -10,8 +10,9 @@ const watchFolders = [
     '/public/bitTorrent/media/'
 ];
 
-// Helper to test series/anime (title, season, episode)
-async function titleSeasonEpTester(title: string, season: string, episode: string, filePath: string) {
+// Helper to test series/anime (title, season, episode). `season` is undefined
+// for absolute-numbered releases that carry no explicit season hint.
+async function titleSeasonEpTester(title: string, season: string | undefined, episode: string, filePath: string) {
     const extractor = new FileNameMetaExtractor(watchFolders);
     const data = await extractor.extractMetadata(filePath);
     expect(data.originalTitle).toEqual(title);
@@ -96,8 +97,8 @@ describe('FileNameMetaExtractor', () => {
                 '/data/watch/test-files/Series/Westworld S03  E08 - Crisis Theory.mp4');
         });
 
-        it('handles files named with only episode numbers assuming season 1', async () => {
-            await titleSeasonEpTester('MythBusters', '1', '1',
+        it('leaves season unset for files named with only an episode number', async () => {
+            await titleSeasonEpTester('MythBusters', undefined, '1',
                 '/data/watch/test-files/Series/MythBusters/MythBusters - Episode 1.avi');
         });
 
@@ -109,7 +110,7 @@ describe('FileNameMetaExtractor', () => {
 
     describe('Anime patterns', () => {
         it('[DB]Haibane Renmei_-_13_(Dual Audio_10bit_BD1080p_x265).mkv', async () => {
-            await titleSeasonEpTester('Haibane Renmei', '1', '13',
+            await titleSeasonEpTester('Haibane Renmei', undefined, '13',
                 '/data/watch/test-files/Anime/[DB]Haibane Renmei_-_13_(Dual Audio_10bit_BD1080p_x265).mkv');
         });
 
@@ -119,7 +120,7 @@ describe('FileNameMetaExtractor', () => {
         });
 
         it('[SubsPlease] Shangri-La Frontier - 07 (1080p) [FC412C51].mkv', async () => {
-            await titleSeasonEpTester('Shangri-La Frontier', '1', '7',
+            await titleSeasonEpTester('Shangri-La Frontier', undefined, '7',
                 '/data/watch/test-files/Anime/[SubsPlease] Shangri-La Frontier - 07 (1080p) [FC412C51].mkv');
         });
 
@@ -129,7 +130,7 @@ describe('FileNameMetaExtractor', () => {
         });
 
         it('_AnimeServ__Dakara_07__8bits__1A8C2326_.mp4', async () => {
-            await titleSeasonEpTester('Dakara', '1', '7',
+            await titleSeasonEpTester('Dakara', undefined, '7',
                 '/data/watch/test-files/Anime/_AnimeServ__Dakara_07__8bits__1A8C2326_.mp4');
         });
 
@@ -144,7 +145,7 @@ describe('FileNameMetaExtractor', () => {
         });
 
         it('[Erai-raws] Mob Psycho 100 - 01  [1080p][FB7288A9].mkv', async () => {
-            await titleSeasonEpTester('Mob Psycho', '1', '1',
+            await titleSeasonEpTester('Mob Psycho', undefined, '1',
                 '/data/watch/test-files/Anime/[Erai-raws] Mob Psycho 100 - 01  [1080p][FB7288A9].mkv');
         });
     });

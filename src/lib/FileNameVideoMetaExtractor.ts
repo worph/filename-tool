@@ -242,13 +242,17 @@ export class FileNameVideoMetaExtractor {
             result.episode = "" + ep;
         }
         if (ep >= 0) {
-            if (sea < 0) {
-                sea = 1;
-                //assume season 1
-                result.season = "1";
+            // An episode with no season is left season-LESS on purpose: a season
+            // is only asserted when explicitly hinted (an S-token in the filename
+            // here, or the parent folder via computeSeasonFromParentFolder above).
+            // Absolute-numbered releases ("Show - 28") thus carry an episode and
+            // no season, so consumers bucket them under "Episodes" rather than a
+            // fabricated "Season 1". `increment` encodes a season, so it is only
+            // emitted when the season is known.
+            if (sea >= 0) {
+                //max ep is 9999
+                result.increment = "" + (sea * 10000 + ep);
             }
-            //max ep is 9999
-            result.increment = "" + (sea * 10000 + ep);
         }
         return result;
     }
