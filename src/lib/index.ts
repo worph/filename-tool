@@ -14,6 +14,7 @@ export * from './tools/StringArrayOperation.js';
 export * from './tools/TwoStringsOperation.js';
 
 export * from './config/AnimeKeywords.js';
+export * from './config/DomainMapping.js';
 export * from './config/ExtentionsMapping.js';
 export * from './config/KeywordsArray.js';
 export * from './config/MimeTypeMapping.js';
